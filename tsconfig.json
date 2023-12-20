@@ -1,0 +1,10 @@
+{
+  "extends": "@total-typescript/tsconfig/bundler/no-dom/app",
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "esnext",
+    "lib": ["esnext"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
