@@ -1,12 +1,18 @@
 import path from 'path';
 import { readFile, stat, writeFile } from 'fs/promises';
+import { styleText } from 'util';
 
-export async function getDayInput(dayNumber: number, dayDirectory: string) {
-  const inputFile = path.join(dayDirectory, 'input.txt');
+export async function getDayInput(dayNumber: number, dayDirectory: string, useExample: boolean) {
+  const inputFile = path.join(dayDirectory, useExample ? 'example.txt' : 'input.txt');
 
   const hasInput = await stat(inputFile).catch(() => false);
 
   if (!hasInput) {
+    if (useExample) {
+      console.error(styleText('red', `Could not find ${inputFile}`));
+      process.exit(1);
+    }
+
     const input = await getInputFromAOC(dayNumber);
 
     await writeFile(inputFile, input.trim());

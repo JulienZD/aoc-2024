@@ -7,10 +7,11 @@ import type { Solver } from './solution.js';
 
 const args = process.argv.slice(2);
 const dayNumber = String(args[0] || new Date().getDate());
+const useExample = args.some((arg) => arg.includes('example'));
 
 const dayDirectory = path.join(fileURLToPath(import.meta.url), '../', 'days', dayNumber);
 
-const input = (await getDayInput(+dayNumber, dayDirectory)).split('\n');
+const input = (await getDayInput(+dayNumber, dayDirectory, useExample)).split('\n');
 
 const { part1, part2 } = (await import(path.join(dayDirectory, 'index.ts'))) as {
   part1?: Solver;

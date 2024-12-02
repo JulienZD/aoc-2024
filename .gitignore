@@ -7,3 +7,4 @@ dist
 !.env.example
 
 input.txt
+example.txt
