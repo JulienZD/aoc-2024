@@ -57,5 +57,38 @@ function findXmases(grid: string[][]): number {
 }
 
 export const part2: Solver = (input) => {
-  return 2;
+  const grid = input.map((line) => line.split(''));
+
+  return findMasXes(grid);
 };
+
+function findMasXes(grid: string[][]): number {
+  let occurrences = 0;
+
+  for (let y = 0; y < grid.length; y++) {
+    const row = grid[y]!;
+    for (let x = 0; x < row.length; x++) {
+      const cell = row[x]!;
+      if (cell !== 'A') {
+        continue;
+      }
+
+      const leftUp = grid[y - 1]?.[x - 1];
+      const rightUp = grid[y - 1]?.[x + 1];
+      const leftDown = grid[y + 1]?.[x - 1];
+      const rightDown = grid[y + 1]?.[x + 1];
+
+      const xWords = [
+        [leftUp, cell, rightDown],
+        [leftDown, cell, rightUp],
+      ].map((words) => [words.join(''), words.toReversed().join('')]);
+
+      const isXMas = xWords.filter((words) => words.some((word) => word === 'MAS')).length === 2;
+      if (isXMas) {
+        occurrences++;
+      }
+    }
+  }
+
+  return occurrences;
+}
