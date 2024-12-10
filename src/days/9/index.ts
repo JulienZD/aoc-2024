@@ -10,6 +10,17 @@ export const part1: Solver = ([input]) => {
   return calculateChecksum(squashed);
 };
 
+export const part2: Solver = ([input]) => {
+  const blocks: Block[] = toBlocks(input!);
+
+  const movedBlocks = moveBlocksPart2(blocks);
+
+  const squashed = squashAdjecentBlockIds(structuredClone(movedBlocks));
+
+  // The checksum doesn't work correctly somehow :(
+  return calculateChecksum(squashed);
+};
+
 type Block = [size: number, id: number | null];
 
 function toBlocks(input: string): Block[] {
@@ -84,6 +95,46 @@ function moveBlocks(_blocks: ReadonlyArray<Block>): Block[] {
   return blocks;
 }
 
+function moveBlocksPart2(_blocks: ReadonlyArray<Block>): Block[] {
+  const blocks = structuredClone(_blocks) as Block[];
+
+  for (let i = blocks.length - 1; i > 0; i--) {
+    const [size, blockId] = blocks[i]!;
+    if (blockId === null) {
+      continue;
+    }
+
+    const emptyIndex = blocks.findIndex((block) => block[1] === null && block[0] >= size);
+    if (emptyIndex === -1 || emptyIndex >= i) {
+      continue;
+    }
+
+    const emptySpace = blocks[emptyIndex]![0]!;
+
+    const canMove = emptySpace - size >= 0;
+    if (!canMove) {
+      continue;
+    }
+
+    // Move the block to the empty space
+    const moveSize = size;
+    blocks[emptyIndex] = [moveSize, blockId];
+
+    // Remove the moved ids
+    blocks[i] = [size, null];
+
+    const remainingEmptySpace = Math.max(emptySpace - size, 0);
+    if (remainingEmptySpace > 0) {
+      // Insert a new empty block to make up for the remaining space
+      blocks.splice(emptyIndex + 1, 0, [remainingEmptySpace, null]);
+
+      i++;
+    }
+  }
+
+  return blocks;
+}
+
 // The moving algorithm doesn't squash any adjecent blockIds, so we need to clean it up
 function squashAdjecentBlockIds(blocks: Block[]): Block[] {
   for (let i = 0; i < blocks.length - 1; i++) {
@@ -107,7 +158,7 @@ function calculateChecksum(blocks: ReadonlyArray<Block>): number {
       continue;
     }
 
-    for (let i = size; i > 0; i--) {
+    for (let i = 0; i < size; i++) {
       total += blockId * id;
       id++;
     }
@@ -115,5 +166,3 @@ function calculateChecksum(blocks: ReadonlyArray<Block>): number {
 
   return total;
 }
-
-export const part2: Solver = (input) => {};
