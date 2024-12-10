@@ -5,7 +5,7 @@ export const part1: Solver = ([input]) => {
 
   const movedBlocks = moveBlocks(blocks);
 
-  const squashed = squashAdjecentBlockIds(structuredClone(movedBlocks));
+  const squashed = squashAdjacentBlockIds(structuredClone(movedBlocks));
 
   return calculateChecksum(squashed);
 };
@@ -15,9 +15,11 @@ export const part2: Solver = ([input]) => {
 
   const movedBlocks = moveBlocksPart2(blocks);
 
-  const squashed = squashAdjecentBlockIds(structuredClone(movedBlocks));
+  let squashed = structuredClone(movedBlocks);
+  for (let i = 0; i < 5; i++) {
+    squashed = squashAdjacentBlockIds(structuredClone(squashed));
+  }
 
-  // The checksum doesn't work correctly somehow :(
   return calculateChecksum(squashed);
 };
 
@@ -98,9 +100,11 @@ function moveBlocks(_blocks: ReadonlyArray<Block>): Block[] {
 function moveBlocksPart2(_blocks: ReadonlyArray<Block>): Block[] {
   const blocks = structuredClone(_blocks) as Block[];
 
+  const movedIds = new Set<number>();
+
   for (let i = blocks.length - 1; i > 0; i--) {
     const [size, blockId] = blocks[i]!;
-    if (blockId === null) {
+    if (blockId === null || movedIds.has(blockId)) {
       continue;
     }
 
@@ -120,6 +124,8 @@ function moveBlocksPart2(_blocks: ReadonlyArray<Block>): Block[] {
     const moveSize = size;
     blocks[emptyIndex] = [moveSize, blockId];
 
+    movedIds.add(blockId);
+
     // Remove the moved ids
     blocks[i] = [size, null];
 
@@ -135,8 +141,8 @@ function moveBlocksPart2(_blocks: ReadonlyArray<Block>): Block[] {
   return blocks;
 }
 
-// The moving algorithm doesn't squash any adjecent blockIds, so we need to clean it up
-function squashAdjecentBlockIds(blocks: Block[]): Block[] {
+// The moving algorithm doesn't squash any adjacent blockIds, so we need to clean it up
+function squashAdjacentBlockIds(blocks: Block[]): Block[] {
   for (let i = 0; i < blocks.length - 1; i++) {
     const current = blocks[i]!;
     const next = blocks[i + 1]!;
@@ -150,17 +156,15 @@ function squashAdjecentBlockIds(blocks: Block[]): Block[] {
 }
 
 function calculateChecksum(blocks: ReadonlyArray<Block>): number {
-  let id = 0;
+  let position = 0;
   let total = 0;
 
   for (const [size, blockId] of blocks) {
-    if (blockId === null) {
-      continue;
-    }
-
     for (let i = 0; i < size; i++) {
-      total += blockId * id;
-      id++;
+      if (blockId !== null) {
+        total += blockId * position;
+      }
+      position++;
     }
   }
 
